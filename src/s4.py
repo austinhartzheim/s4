@@ -15,14 +15,12 @@ if __name__ == '__main__':
     pprint.pprint(config)  # TODO: remove debug
 
     # Create AWS session
-    session = boto3.session.Session(
-        aws_access_key_id=config['credentials']['access_key_id'],
-        aws_secret_access_key=config['credentials']['access_key_secret'])
+    session = boto3.session.Session(**config['aws']['credentials'])
     s3 = session.resource('s3')
 
     # Check if bucket exists
     try:
-        s3.meta.client.head_bucket(Bucket=config['credentials']['bucket'])
+        s3.meta.client.head_bucket(Bucket=config['aws']['bucket']['name'])
     except botocore.exceptions.ClientError as err:
         error_code = int(err.response['Error']['Code'])
         if error_code == 404:  # Bucket could not be found

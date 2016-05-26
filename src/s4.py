@@ -2,9 +2,19 @@
 '''
 s3sync: synchronize data to AWS S3.
 '''
+import os
+
 import boto3
 import botocore
 import pytoml as toml
+
+
+def sync(config):
+    for root, dirs, files in os.walk(config['sync']['root']['path']):
+        # TODO: add code to ignore the s4 config to avoid syncing credentials
+        print('%s:' % root)
+        for dire in dirs: print('  d %s' % dire)
+        for file in files: print('  f %s' % file)
 
 
 if __name__ == '__main__':
@@ -32,3 +42,6 @@ if __name__ == '__main__':
             print('The following are some known causes of this error:')
             print(' - User does not have access to S3')
             print(' - The bucket is owned by another account')
+
+    # Sync files
+    sync(config)

@@ -4,6 +4,7 @@ s3sync: synchronize data to AWS S3.
 '''
 import os
 import enum
+import argparse
 
 import boto3
 import botocore
@@ -18,7 +19,9 @@ class BucketAccess(enum.IntEnum):
 
 class Main():
 
-    def __init__(self):
+    def __init__(self, args):
+        self.args = args
+
         self.config = self.load_config()
         session = boto3.session.Session(**self.config['aws']['credentials'])
         self.s3 = session.resource('s3')
@@ -73,4 +76,15 @@ class Main():
 
 
 if __name__ == '__main__':
-    main = Main()
+
+    parser = argparse.ArgumentParser(prog='s4')
+    subparsers = parser.add_subparsers()
+    parser_init = subparsers.add_parser('init')
+    parser_add = subparsers.add_parser('add')
+
+    parser_init.add_argument('path', type=str)
+    parser_add.add_argument('file', type=argparse.FileType('r'), nargs='+')
+
+    args = parser.parse_args()
+
+    main = Main(args)

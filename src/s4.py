@@ -10,6 +10,8 @@ import boto3
 import botocore
 import pytoml as toml
 
+from libs.config import Config
+
 
 class BucketAccess(enum.IntEnum):
     Accessible = 0
@@ -17,41 +19,14 @@ class BucketAccess(enum.IntEnum):
     Forbidden = 403
 
 
-class Config():
-    def __init__(self):
-        self.config = {
-            'aws': {
-                'credentials': {
-                    'aws_access_key_id': '',
-                    'aws_secret_access_key': ''
-                },
-                'bucket': {
-                    'name': '',
-                    'path': '/'
-                }
-            },
-            'sync': {
-                'root': {
-                    'path': '.'
-                }
-            }
-        }
-
-    def load(self, path):
-        with open(path) as fp:
-            self.config = toml.load(fp)
-
-    def save(self, path):
-        with open(path, 'w') as fp:
-            toml.dump(fp, self.config)
-
-
 class Main():
 
     def __init__(self, args):
         self.args = args
 
-        self.config = self.load_config()
+        self.config = Config()
+        self.config.load('s4config.toml')
+
         session = boto3.session.Session(**self.config['aws']['credentials'])
         self.s3 = session.resource('s3')
 
@@ -76,16 +51,6 @@ class Main():
             print('%s:' % root)
             for dire in dirs: print('  d %s' % dire)
             for file in files: print('  f %s' % file)
-
-    def load_config(self):
-        '''
-        Find and load the configuration file.
-        '''
-        import pprint
-        with open('s4config.toml') as config_f:
-            config = toml.load(config_f)
-        pprint.pprint(config)  # TODO: remove debug
-        return config
 
     def check_bucket_access(self, bucketname):
         '''
